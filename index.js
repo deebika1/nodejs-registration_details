@@ -5,13 +5,7 @@ const app = express();
 
 app.use(bodyParser.json());
 
-let userDetails = [
-  {
-    id: "1",
-    name: "venkat",
-    email: "venkat@guvi.in",
-  },
-];
+let userDetails = [];
 
 app.listen(3000, () => {
   console.log("your app is running in 3000");
