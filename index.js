@@ -9,12 +9,10 @@ const port = process.env.PORT || 3000;
 
 let userDetails = [];
 
-app.listen(port, () => {
-  console.log("your app is running in", port);
-});
+app.listen(port, () => console.log("your app is running in", port));
 
 app.get("/", (req, res) => {
-  res.send("<h1>Hello World</h1>");
+  res.send("<h1>Simple GET & POST request app..! </h1>");
 });
 
 app.get("/users", (req, res) => {
