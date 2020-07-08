@@ -5,10 +5,12 @@ const app = express();
 
 app.use(bodyParser.json());
 
+const port = process.env.PORT || 3000;
+
 let userDetails = [];
 
-app.listen(3000, () => {
-  console.log("your app is running in 3000");
+app.listen(port, () => {
+  console.log("your app is running in", port);
 });
 
 app.get("/", (req, res) => {
