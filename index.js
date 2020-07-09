@@ -10,7 +10,11 @@ const port = process.env.PORT || 3000;
 let userDetails = [
   {
     id: 1,
-    name: "venkat",
+    name: "Person 1",
+  },
+  {
+    id: 2,
+    name: "Person 2",
   },
 ];
 
@@ -47,4 +51,20 @@ app.put("/users/:id", (req, res) => {
   });
 });
 
-// app.delete();
+app.delete("/users/:id", (req, res) => {
+  console.log(req.params.id);
+
+  let filterVal = userDetails.filter((elem) => {
+    if (elem.id == req.params.id) {
+      return elem;
+    }
+  })[0];
+  
+  let index = userDetails.indexOf(filterVal);
+  userDetails.splice(index, 1);
+
+  // //use it if needed
+  // userDetails = filterVal;
+  // delete userDetails[index];
+  res.send(userDetails);
+});
