@@ -7,7 +7,12 @@ app.use(bodyParser.json());
 
 const port = process.env.PORT || 3000;
 
-let userDetails = [];
+let userDetails = [
+  {
+    id: 1,
+    name: "venkat",
+  },
+];
 
 app.listen(port, () => console.log("your app is running in", port));
 
@@ -16,7 +21,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/users", (req, res) => {
-  res.json(userDetails);
+  res.status(200).send(userDetails);
 });
 
 app.post("/users", (req, res) => {
@@ -25,3 +30,21 @@ app.post("/users", (req, res) => {
     message: "User Created..!!",
   });
 });
+
+app.put("/users/:id", (req, res) => {
+  console.log(req.params.id);
+  userDetails.forEach((elem) => {
+    if (elem.id == req.params.id) {
+      elem.name = req.body.name;
+      res.status(200).send({
+        message: "User Updated..!",
+      });
+    } else {
+      res.send({
+        message: "Invalid id",
+      });
+    }
+  });
+});
+
+// app.delete();
