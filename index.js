@@ -5,7 +5,7 @@ const app = express();
 
 app.use(bodyParser.json());
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 
 let userDetails = [
   {
@@ -16,6 +16,18 @@ let userDetails = [
     id: 2,
     name: "Person 2",
   },
+  {
+    id: 3,
+    name: "Person 3",
+  },
+  {
+    id: 4,
+    name: "Person 4",
+  },
+  {
+    id: 5,
+    name: "Person 5",
+  },
 ];
 
 app.listen(port, () => console.log("your app is running in", port));
@@ -25,7 +37,10 @@ app.get("/", (req, res) => {
 });
 
 app.get("/users", (req, res) => {
-  res.status(200).send(userDetails);
+  res.json(userDetails);
+
+  // res.json()
+  // res.send()
 });
 
 app.post("/users", (req, res) => {
