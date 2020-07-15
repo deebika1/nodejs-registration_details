@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const bcrypt = require("bcrypt");
 
 // simply mongodb installed
 const mongodb = require("mongodb");
@@ -23,7 +24,7 @@ app.get("/", (req, res) => {
 app.get("/users", (req, res) => {
   mongoClient.connect(dbURL, (err, client) => {
     if (err) throw err;
-    let db = client.db("collegeRecords");
+    let db = client.db("studentDetail");
     db.collection("users")
       .find()
       .toArray()
@@ -42,7 +43,7 @@ app.get("/users", (req, res) => {
 app.post("/users", (req, res) => {
   mongoClient.connect(dbURL, (err, client) => {
     client
-      .db("collegeRecords")
+      .db("studentDetail")
       .collection("users")
       .insertOne(req.body, (err, data) => {
         if (err) throw err;
@@ -59,7 +60,7 @@ app.put("/users/:id", (req, res) => {
   mongoClient.connect(dbURL, (err, client) => {
     if (err) throw err;
     client
-      .db("collegeRecords")
+      .db("studentDetail")
       .collection("users")
       .findOneAndUpdate({ _id: objectID(req.params.id) }, { $set: req.body })
       .then((data) => {
@@ -76,7 +77,7 @@ app.delete("/users/:id", (req, res) => {
   mongoClient.connect(dbURL, (err, client) => {
     if (err) throw err;
     client
-      .db("collegeRecords")
+      .db("studentDetail")
       .collection("users")
       .deleteOne({ _id: objectID(req.params.id) }, (err, data) => {
         if (err) throw err;
@@ -84,6 +85,60 @@ app.delete("/users/:id", (req, res) => {
         res.status(200).json({
           message: "User deleted...!!",
         });
+      });
+  });
+});
+
+app.post("/register", (req, res) => {
+  mongoClient.connect(dbURL, (err, client) => {
+    if (err) throw err;
+    let db = client.db("studentDetail");
+    db.collection("users").findOne({ email: req.body.email }, (err, data) => {
+      if (err) throw err;
+      if (data) {
+        res.status(400).json({ message: "Email already exists..!!" });
+      } else {
+        bcrypt.genSalt(10, (err, salt) => {
+          bcrypt.hash(req.body.password, salt, (err, cryptPassword) => {
+            if (err) throw err;
+            req.body.password = cryptPassword;
+            db.collection("users").insertOne(req.body, (err, result) => {
+              if (err) throw err;
+              client.close();
+              res.status(200).json({ message: "Registration successful..!! " });
+            });
+          });
+        });
+      }
+    });
+  });
+});
+
+app.post("/login", (req, res) => {
+  mongoClient.connect(dbURL, (err, client) => {
+    if (err) throw err;
+    client
+      .db("studentDetail")
+      .collection("users")
+      .findOne({ email: req.body.email }, (err, data) => {
+        if (err) throw err;
+        if (data) {
+          bcrypt.compare(req.body.password, data.password, (err, validUser) => {
+            if (err) throw err;
+            console.log("validUser", validUser);
+            if (validUser) {
+              res.status(200).json({ message: "Login success..!!" });
+            } else {
+              res
+                .status(403)
+                .json({ message: "Bad Credentials, Login unsuccessful..!!" });
+            }
+          });
+        } else {
+          res.status(401).json({
+            message: "Email is not registered, Kindly register it..!!",
+          });
+        }
       });
   });
 });
