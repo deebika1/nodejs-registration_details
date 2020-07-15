@@ -2,13 +2,20 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
+const dotenv = require("dotenv");
+dotenv.config();
 
 // simply mongodb installed
 const mongodb = require("mongodb");
 const mongoClient = mongodb.MongoClient;
 const objectID = mongodb.ObjectID;
 
-const dbURL = "mongodb://127.0.0.1:27017";
+// const dbURL =
+//   "mongodb+srv://rvsp:vgBdLGDqVViScZ0F@training-cluster-4aefv.gcp.mongodb.net/studentDetail?retryWrites=true&w=majority";
+
+// const dbURL = 'mongodb://127.0.0.1:27017';
+
+const dbURL = process.env.DB_URL;
 
 const app = express();
 app.use(bodyParser.json());
