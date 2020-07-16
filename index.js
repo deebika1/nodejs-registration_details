@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -10,7 +11,7 @@ const mongodb = require("mongodb");
 const mongoClient = mongodb.MongoClient;
 const objectID = mongodb.ObjectID;
 
-const dbURL = process.env.DB_URL;
+const dbURL = "mongodb://127.0.0.1:27017";
 
 const app = express();
 app.use(bodyParser.json());
@@ -23,7 +24,7 @@ app.get("/", (req, res) => {
   res.send("<h1>Simple GET & POST request app..! </h1>");
 });
 
-app.get("/users", (req, res) => {
+app.get("/users", authenticatedUsers, (req, res) => {
   mongoClient.connect(dbURL, (err, client) => {
     if (err) throw err;
     let db = client.db("studentDetail");
@@ -127,9 +128,15 @@ app.post("/login", (req, res) => {
         if (data) {
           bcrypt.compare(req.body.password, data.password, (err, validUser) => {
             if (err) throw err;
-            console.log("validUser", validUser);
             if (validUser) {
-              res.status(200).json({ message: "Login success..!!" });
+              jwt.sign(
+                { userId: data._id, email: data.email },
+                "uzKfyTDx4v5z6NSV",
+                { expiresIn: "1h" },
+                (err, token) => {
+                  res.status(200).json({ message: "Login success..!!", token });
+                }
+              );
             } else {
               res
                 .status(403)
@@ -138,9 +145,36 @@ app.post("/login", (req, res) => {
           });
         } else {
           res.status(401).json({
-            message: "Email is not registered, Kindly register it..!!",
+            message: "Email is not registered, Kindly register..!!",
           });
         }
       });
   });
 });
+
+app.get("/home", authenticatedUsers, (req, res) => {
+  res
+    .status(200)
+    .json({ message: "Only Authenticated users can see this message..!!!" });
+});
+
+function authenticatedUsers(req, res, next) {
+  if (req.headers.authorization == undefined) {
+    res.status(401).json({
+      message: "No token available in headers",
+    });
+  } else {
+    jwt.verify(
+      req.headers.authorization,
+      "uzKfyTDx4v5z6NSV",
+      (err, decodedString) => {
+        if (decodedString == undefined) {
+          res.status(401).json({ message: "Invalid Token" });
+        } else {
+          console.log(decodedString);
+          next();
+        }
+      }
+    );
+  }
+}
